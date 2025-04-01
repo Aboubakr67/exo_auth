@@ -1,27 +1,40 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const { newUser, verifyPassword } = require("../services/authService");
+const { createUser, login } = require("../services/authService");
 const User = require("../models/User");
+
+// ---------------------------------------------- INSCRIPTION --------------------------------------
+router.get("/register", (req, res) => {
+    res.render("register", { error: null });
+  });
+  
 
 router.post("/register", async (req, res) => {
   const { username, password } = req.body;
-  const result = await newUser(username, password);
+  console.log(username);
+  console.log(password);
+  const result = await createUser(username, password);
 
   if (!result.success) {
-    return res.status(400).json(result);
+    return res.render("register", { error: result.message });
   }
-  res.status(201).json(result);
+  res.render("welcome", { username });
 });
+
+// ---------------------------------------------- CONNEXION --------------------------------------
+router.get("/login", (req, res) => {
+    res.render("login", { error: null });
+  });
 
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const result = await verifyPassword(username, password);
+  const result = await login(username, password);
 
   if (!result.success) {
-    return res.status(401).json(result);
+    return res.render("login", { error: result.message });
   }
-  res.status(200).json(result);
+  res.render("welcome", { username });
 });
 
 router.get("/users", async (req, res) => {

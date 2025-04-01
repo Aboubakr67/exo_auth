@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
 
-async function newUser(username, password) {
+async function createUser(username, password) {
   if (!username || !password) {
     return { success: false, message: "Veuillez remplir tous les champs !" };
   }
@@ -11,7 +11,6 @@ async function newUser(username, password) {
   }
 
   try {
-    // Vérifie si l'utilisateur existe déjà
     const existingUser = await User.findOne({ username });
     if (existingUser) {
       return { success: false, message: "Ce nom d'utilisateur est déjà pris !" };
@@ -30,7 +29,7 @@ async function newUser(username, password) {
   }
 }
 
-async function verifyPassword(username, password) {
+async function login(username, password) {
   if (!username || !password) {
     return { success: false, message: "Veuillez remplir tous les champs !" };
   }
@@ -52,4 +51,4 @@ async function verifyPassword(username, password) {
   }
 }
 
-module.exports = { newUser, verifyPassword };
+module.exports = { createUser, login };
