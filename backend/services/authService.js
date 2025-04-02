@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const User = require("../models/User");
+const jwt = require("jsonwebtoken");
 
 async function createUser(username, password) {
   if (!username || !password) {
@@ -19,10 +20,12 @@ async function createUser(username, password) {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = new User({ username, password: hashedPassword });
+    const user = new User({ username, password: hashedPassword, role: "user" });
     await user.save();
 
-    return { success: true, message: "Utilisateur créé avec succès !" };
+    const token = generateToken(user);
+
+    return { success: true, message: "Utilisateur créé avec succès !", token };
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur :", error);
     return { success: false, message: "Erreur interne du serveur." };
@@ -42,13 +45,22 @@ async function login(username, password) {
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    return isMatch
-      ? { success: true, message: "Connexion réussie !" }
-      : { success: false, message: "Nom d'utilisateur ou mot de passe incorrect !" };
+
+    if(isMatch) {
+      const token = generateToken(user);
+      return { success: true, message: "Connexion réussie !", token };
+    } else {
+      return { success: false, message: "Nom d'utilisateur ou mot de passe incorrect !" }
+    }
+
   } catch (error) {
     console.error("Erreur lors de la vérification du mot de passe :", error);
     return { success: false, message: "Erreur interne du serveur." };
   }
+}
+
+function generateToken(user) {
+  return jwt.sign({ username: user.username, id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
 }
 
 module.exports = { createUser, login };

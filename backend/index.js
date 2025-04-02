@@ -2,11 +2,13 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
+const cors = require("cors");
 // const { newUser, verifyPassword } = require("./Services/authService");
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 app.set("view engine", "ejs");
 app.set("views", "./views");
