@@ -16,12 +16,21 @@ router.get("/me", authMiddleware, (req, res) => {
   });
 
 
-router.get("/users", authMiddleware, async (req, res) => {
+router.get("/allusers", authMiddleware, async (req, res) => {
     if(req.user.role !== "admin") {
         return res.status(401).json({ success: false, message: "Accès non autorisé. Veuillez vous connecter." });
     }
     const users = await User.find();
-    res.json({ success: true, users });
+    // sans les password des users
+    const usersWithoutPassword = users.map(user => ({
+      username: user.username,
+      email: user.email,
+      id: user._id,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt
+    }));
+    res.json({ success: true, users: usersWithoutPassword });
   });
   
   

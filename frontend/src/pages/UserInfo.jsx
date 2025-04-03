@@ -125,13 +125,6 @@ const UserInfo = () => {
           Mettre à jour
         </button>
       </form>
-
-      <button
-        onClick={logout}
-        className="mt-4 w-full bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600"
-      >
-        Se déconnecter
-      </button>
     </div>
   );
 };

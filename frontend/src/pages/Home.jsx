@@ -18,13 +18,9 @@ const Home = () => {
         <h2 className="text-3xl font-bold text-gray-800 mb-4">
           Bienvenue, {user?.username} !
         </h2>
-        <p className="text-gray-600 mb-6">Tu es connecté à ton espace personnel.</p>
-        <button
-          onClick={logout}
-          className="px-6 py-3 text-white font-semibold bg-red-500 hover:bg-red-600 rounded-lg transition-all duration-300 shadow-md"
-        >
-          Se déconnecter
-        </button>
+        <p className="text-gray-600 mb-6">
+          Tu es connecté à ton espace personnel.
+        </p>
       </div>
     </div>
   );
