@@ -2,8 +2,8 @@ const bcrypt = require("bcrypt");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
-async function createUser(username, password) {
-  if (!username || !password) {
+async function createUser(username, email, password) {
+  if (!username || !email || !password) {
     return { success: false, message: "Veuillez remplir tous les champs !" };
   }
 
@@ -12,45 +12,46 @@ async function createUser(username, password) {
   }
 
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return { success: false, message: "Ce nom d'utilisateur est déjà pris !" };
+      return { success: false, message: "Cet email est déjà utilisé !" };
     }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = new User({ username, password: hashedPassword, role: "user" });
+    const user = new User({ username, email, password: hashedPassword, role: "user" });
     await user.save();
+    const { password: userPassword, ...userWithoutPassword } = user.toObject();
 
-    const token = generateToken(user);
+    // const token = generateToken(user);
 
-    return { success: true, message: "Utilisateur créé avec succès !", token };
+    return { success: true, message: "Utilisateur créé avec succès !", user: userWithoutPassword };
   } catch (error) {
     console.error("Erreur lors de la création de l'utilisateur :", error);
     return { success: false, message: "Erreur interne du serveur." };
   }
 }
 
-async function login(username, password) {
-  if (!username || !password) {
+async function login(email, password) {
+  if (!email || !password) {
     return { success: false, message: "Veuillez remplir tous les champs !" };
   }
 
   try {
-    const user = await User.findOne({ username });
+    const user = await User.findOne({ email });
     if (!user) {
-    //   return { success: false, message: "Utilisateur non trouvé !" };
-      return { success: false, message: "Nom d'utilisateur ou mot de passe incorrect !" };
+      return { success: false, message: "Email ou mot de passe incorrect !" };
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if(isMatch) {
-      const token = generateToken(user);
-      return { success: true, message: "Connexion réussie !", token };
+      const { password: userPassword, ...userWithoutPassword } = user.toObject();
+      // const token = generateToken(user);
+      return { success: true, message: "Connexion réussie !", user: userWithoutPassword };
     } else {
-      return { success: false, message: "Nom d'utilisateur ou mot de passe incorrect !" }
+      return { success: false, message: "Email ou mot de passe incorrect !" }
     }
 
   } catch (error) {
@@ -60,7 +61,7 @@ async function login(username, password) {
 }
 
 function generateToken(user) {
-  return jwt.sign({ username: user.username, id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1h" });
+  return jwt.sign({ username: user.username, email: user.email, id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "1d" });
 }
 
-module.exports = { createUser, login };
+module.exports = { createUser, login, generateToken };

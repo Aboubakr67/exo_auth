@@ -5,6 +5,7 @@ import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Header from "./partials/Header";
 import Footer from "./partials/Footer";
+import UserInfo from "./pages/UserInfo";
 
 function App() {
   const { user } = useAuth();
@@ -17,6 +18,7 @@ function App() {
           <Route path="/login" element={!user ? <Login /> : <Home />} />
           <Route path="/register" element={!user ? <Register /> : <Home />} />
           <Route path="/" element={user ? <Home /> : <Login />} />
+          <Route path="/user-info" element={user ? <UserInfo /> : <Login />} />
         </Routes>
       </div>
       <Footer />

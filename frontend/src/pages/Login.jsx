@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const { login } = useAuth();
@@ -15,11 +15,13 @@ const Login = () => {
       const response = await fetch("http://localhost:3000/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
       const data = await response.json();
+      console.log(response);
       if (data.result.success) {
-        login(data.result.token);
+        login(data.result.user);
         navigate("/");
       } else {
         setError(data.result.message);
@@ -36,14 +38,14 @@ const Login = () => {
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <form onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="username" className="block text-left text-gray-700">
-              Nom d'utilisateur
+            <label htmlFor="email" className="block text-left text-gray-700">
+              Email
             </label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full p-3 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />

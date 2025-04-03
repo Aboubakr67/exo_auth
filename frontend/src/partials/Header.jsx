@@ -18,6 +18,11 @@ const Header = () => {
                   </Link>
                 </li>
                 <li>
+                  <Link to="/user-info" className="hover:text-gray-300">
+                    Informations
+                  </Link>
+                </li>
+                <li>
                   <button onClick={logout} className="hover:text-gray-300">
                     Se déconnecter
                   </button>

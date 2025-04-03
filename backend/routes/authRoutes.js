@@ -1,8 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const router = express.Router();
-const { createUser, login } = require("../services/authService");
+const { createUser, login, generateToken } = require("../services/authService");
 const User = require("../models/User");
+const authMiddleware = require("../middlewares/authMiddleware");
 
 // ---------------------------------------------- INSCRIPTION --------------------------------------
 // router.get("/register", (req, res) => {
@@ -11,17 +12,18 @@ const User = require("../models/User");
   
 
 router.post("/register", async (req, res) => {
-  const { username, password } = req.body;
-  console.log(username);
-  console.log(password);
-  const result = await createUser(username, password);
+  const { username, email, password } = req.body;
+  const result = await createUser(username, email, password);
 
   if (!result.success) {
     // return res.render("register", { error: result.message });
     return res.status(400).json({ result });
   }
   // res.render("welcome", { username });
-  res.cookie("token", result.token, {httpOnly: true, sameSite: "lax"});
+  const token = generateToken(result.user);
+  res.cookie("token", token, {httpOnly: true, sameSite: "lax", maxAge: 3600000});
+  console.log("Nouvelle utilisateur créée");
+  console.log("Username : " + result.user.username + " - " + "Email : " + result.user.email);
   return res.status(200).json({ result });
 });
 
@@ -31,21 +33,21 @@ router.post("/register", async (req, res) => {
 //   });
 
 router.post("/login", async (req, res) => {
-  const { username, password } = req.body;
-  const result = await login(username, password);
+  const { email, password } = req.body;
+  const result = await login(email, password);
 
   if (!result.success) {
     // return res.render("login", { error: result.message });
     return res.status(400).json({ result });
   }
   // res.render("welcome", { username });
-  res.cookie("token", result.token, {httpOnly: true, sameSite: "lax"});
+  const token = generateToken(result.user);
+  res.cookie("token", token, {httpOnly: true, sameSite: "lax", maxAge: 3600000});
+
+  console.log("Utilisateur connecté");
+  console.log("Username : " + result.user.username + " - " + "Email : " + result.user.email);
   return res.status(200).json({ result });
 });
 
-router.get("/users", async (req, res) => {
-  const users = await User.find();
-  res.json(users);
-});
 
 module.exports = router;
